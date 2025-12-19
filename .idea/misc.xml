@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+<<<<<<< HEAD
   <component name="Black">
     <option name="sdkName" value="Python 3.12 (calendarsync)" />
   </component>
+=======
+>>>>>>> 1dae51e7389e5a86b333ad552590394b2e08bf9f
   <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.12 (calendarsync)" project-jdk-type="Python SDK" />
 </project>
