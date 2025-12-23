@@ -24,14 +24,13 @@ async def run_pipeline():
     
     try:
         await db.init_database()
-        
         sync_engine = CalendarSynchronizer(
             db_manager=db,
             google_client=GoogleCalendarAPI(),
-            notion_client=NotionAPI(use_mock=True),
-            yandex_client=YandexCalendarAPI(use_mock=False)
+            notion_client=NotionAPI(),
+            yandex_client=YandexCalendarAPI()
         )
-        
+
         log.info("Starting synchronization cycle...")
         report = await sync_engine.sync(days=7)
         

@@ -31,12 +31,14 @@ class CalendarSynchronizer:
                     continue
 
                 await self.db.save_event_link(
-                    source_id=event['id'], 
-                    yandex_id=yandex_id, 
-                    source_name=event.get('source_name', 'unknown')
+                    source_id=event['id'],
+                    yandex_id=yandex_id,
+                    source_name=event.get('source', 'unknown'),
+                    title=event.get('title')
                 )
                 stats["created"] += 1
-                log.info("Synced: %s", event.get('summary', 'No title'))
+                log.info("Synced: %s", event.get('title', 'No title'))
+
 
             except Exception as e:
                 log.error("Error processing event %s: %s", event.get('id'), e)
