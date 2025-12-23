@@ -2,8 +2,10 @@ import asyncio
 import logging
 import sys
 from pathlib import Path
+from dotenv import load_dotenv
 
 root = Path(__file__).resolve().parents[1]
+load_dotenv(root / ".env")
 if str(root) not in sys.path:
     sys.path.append(str(root))
 

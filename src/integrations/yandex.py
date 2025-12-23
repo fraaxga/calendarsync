@@ -5,6 +5,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Dict, Any, List
 from requests.auth import HTTPBasicAuth
+from urllib.parse import quote
 
 log = logging.getLogger(__name__)
 
@@ -12,9 +13,14 @@ class YandexCalendarAPI:
     def __init__(self):
         self.user = os.getenv("YANDEX_EMAIL")
         self.password = os.getenv("YANDEX_APP_PASSWORD")
-        self.calendar_id = os.getenv("YANDEX_CALENDAR_ID", "events")
-        
-        self.base_url = f"https://caldav.yandex.ru/calendars/{self.user}/{self.calendar_id}/"
+        self.calendar_id = os.getenv("YANDEX_CALENDAR_ID", "")
+        if self.user:
+            user_path = quote(self.user, safe="")
+        else:
+            user_path = ""
+        self.base_url = f"https://caldav.yandex.ru/calendars/{user_path}/"
+        if self.calendar_id:
+            self.base_url += f"{self.calendar_id}/"
 
     def create_event(self, event_data: Dict[str, Any]) -> str | None:
         if not all([self.user, self.password]):

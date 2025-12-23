@@ -18,6 +18,7 @@ data/*.db-journal
 
 src/config/google_token.pickle
 src/config/yandex_token.json
+src/config/token.json
 src/config/*credentials.json
 
 *.log
