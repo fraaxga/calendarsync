@@ -11,10 +11,14 @@ log = logging.getLogger(__name__)
 
 class GoogleCalendarAPI:
     def __init__(self):
-        if not GoogleAuth:
-            log.error("GoogleAuth module not found. Check your project structure.")
+        try:
+            self.service = GoogleAuth().get_service()
+        except FileNotFoundError as e:
+            log.warning("Google credentials not found (%s). Google sync disabled.", e)
             self.service = None
-            return
+        except Exception:
+            log.exception("Failed to initialize Google Calendar service")
+            self.service = None
 
         try:
             self.service = GoogleAuth().get_service()

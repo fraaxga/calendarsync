@@ -13,11 +13,14 @@ class GoogleAuth:
     
     SCOPES = ['https://www.googleapis.com/auth/calendar']
     
-    def __init__(self, config_path: str = "src/config"):
-        self.config_dir = Path(config_path)
-        self.token_file = self.config_dir / 'token.json'  
-        self.creds_file = self.config_dir / 'credentials.json'
-        
+    def __init__(self, config_path: str | None = None):
+        if config_path is None:
+            base_dir = Path(__file__).resolve().parents[1]
+            self.config_dir = base_dir / "config"
+        else:
+            self.config_dir = Path(config_path)
+        self.token_file = self.config_dir / "token.json"
+        self.creds_file = self.config_dir / "credentials.json"
         self._creds = None
 
     def _load_stored_credentials(self) -> Credentials | None:
