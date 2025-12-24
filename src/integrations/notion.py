@@ -19,7 +19,36 @@ class NotionAPI:
             self.enabled = True
             self.client = Client(auth=self.token)
             log.info("Notion API client initialized")
+    def _page_to_event(self, page: dict, date_prop_name: str = "Date") -> dict | None:
+        props = page.get("properties", {})
+        title_prop = next((v for v in props.values() if v.get("type") == "title"), None)
+        title = (
+            title_prop["title"][0]["plain_text"]
+            if title_prop and title_prop.get("title")
+            else "Untitled"
+        )
 
+        date_prop = props.get(date_prop_name)
+        if not date_prop or not date_prop.get("date") or not date_prop["date"].get("start"):
+            return None
+
+        from datetime import datetime, timedelta
+        start_raw = date_prop["date"]["start"]
+        end_raw = date_prop["date"].get("end") or start_raw
+        start = datetime.fromisoformat(start_raw.replace("Z", "+00:00"))
+        end = datetime.fromisoformat(end_raw.replace("Z", "+00:00"))
+        if end <= start:
+            end = start + timedelta(hours=1)
+
+        return {
+            "id": page.get("id"),
+            "title": title,
+            "start": start,
+            "end": end,
+            "description": "Imported from Notion",
+            "source": "notion",
+            "source_name": "notion",
+        }
     def get_events(self, days: int = 7) -> List[Dict[str, Any]]:
         if not self.enabled:
             return self._get_emulated_events(days)
@@ -32,40 +61,12 @@ class NotionAPI:
             )
             events: List[Dict[str, Any]] = []
             for page in res.get("results", []):
-                props = page.get("properties", {})
-                title_prop = next((v for v in props.values() if v.get("type") == "title"), None)
-                title = (
-                    title_prop["title"][0]["plain_text"]
-                    if title_prop and title_prop.get("title")
-                    else "Untitled"
-                )
-                date_prop = props.get("Date")
-                if not date_prop or not date_prop.get("date"):
+                ev = self._page_to_event(page, date_prop_name="Date")
+                if not ev:
                     continue
-
-                start_raw = date_prop["date"].get("start")
-                end_raw = date_prop["date"].get("end") or start_raw
-                if not start_raw:
+                if ev["end"] < now or ev["start"] > until:
                     continue
-
-                start = datetime.fromisoformat(start_raw.replace("Z", "+00:00"))
-                end = datetime.fromisoformat(end_raw.replace("Z", "+00:00"))
-                if end <= start:
-                    end = start + timedelta(hours=1)
-                if end < now or start > until:
-                    continue
-
-                events.append({
-                    "id": page["id"],
-                    "title": title,
-                    "start": start,
-                    "end": end,
-                    "description": "Imported from Notion",
-                    "source": "notion",
-                    "source_name": "notion",
-                })
-
-            return events
+                events.append(ev)
 
         except Exception:
             log.exception("Failed to query Notion database")
