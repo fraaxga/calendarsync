@@ -67,6 +67,7 @@ class NotionAPI:
                 if ev["end"] < now or ev["start"] > until:
                     continue
                 events.append(ev)
+            return events
 
         except Exception:
             log.exception("Failed to query Notion database")
