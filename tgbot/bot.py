@@ -36,7 +36,9 @@ async def build_sync_engine() -> CalendarSynchronizer:
 router = Router()
 @router.message(Command("start"))
 async def start_handler(message: Message):
-    await message.answer("start тестовый бот calendar_sync")
+    await message.answer("Привет! Это бот-синхронизатор календарей. \n"
+                         "/sync - для запуска синхронизации календарей Notion, Google и Yandex \n"
+                         "/status - для просмотра созданных, пропущенных событий и ошибок.")
 
 async def main():
     token = os.getenv("CSYNC_TELEGRAM_TOKEN")
@@ -51,30 +53,30 @@ async def status_handler(message: Message):
         await message.answer("синхронизации еще не было (/sync)")
         return
     await message.answer(
-        "last sync status:\n"
-        f"created: {last_report.get('created', 0)}\n"
-        f"skipped: {last_report.get('skipped', 0)}\n"
-        f"errors: {last_report.get('errors', 0)}"
+        "Последняя синхронизация:\n"
+        f"Создано новых событий: {last_report.get('created', 0)}\n"
+        f"Пропущено из-за конфликтов: {last_report.get('skipped', 0)}\n"
+        f"Ошибки: {last_report.get('errors', 0)}"
     )
 @router.message(Command("sync"))
 async def sync_handler(message: Message):
     global last_report
     if sync_lock.locked():
-        await message.answer("in process, please wait")
+        await message.answer("Ожидайте, идет процесс синхронизации")
         return
     async with sync_lock:
-        await message.answer("synching на 7 дней forward")
+        await message.answer("Синхронизирую на 7 дней вперед")
         try:
             engine = await build_sync_engine()
             last_report = await engine.sync(days=7)
             await message.answer(
                 "done\n"
-                f"created: {last_report.get('created', 0)}\n"
-                f"skipped: {last_report.get('skipped', 0)}\n"
-                f"errors: {last_report.get('errors', 0)}"
+                f"Создано новых событий: {last_report.get('created', 0)}\n"
+                f"Пропущено из-за конфликтов: {last_report.get('skipped', 0)}\n"
+                f"Ошибки: {last_report.get('errors', 0)}"
             )
         except Exception:
-            log.exception("sync failed")
+            log.exception("Ошибка синхронизации")
             last_report = {"created": 0, "skipped": 0, "errors": 1}
             await message.answer("error during sync")
 
