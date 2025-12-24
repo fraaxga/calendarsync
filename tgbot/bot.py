@@ -79,6 +79,7 @@ async def sync_handler(message: Message):
             log.exception("Ошибка синхронизации")
             last_report = {"created": 0, "skipped": 0, "errors": 1}
             await message.answer("error during sync")
+        return last_report
 
 if __name__ == "__main__":
     asyncio.run(main())
