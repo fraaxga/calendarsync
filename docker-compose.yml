@@ -1,0 +1,9 @@
+services:
+  calendarsync:
+    build: .
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./src/config:/app/src/config
+    restart: unless-stopped
